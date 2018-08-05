@@ -30,8 +30,6 @@ const category = [
   { key: 'travel', text: 'Travel', value: 'travel' }
 ];
 
-// AIzaSyA54VeS8yMFTrmhtcSBoatHcgVh5vse8EA
-
 const validate = combineValidators({
   title: isRequired({ message: 'The event title is required' }),
   category: isRequired({ message: 'Please provide a category' }),
@@ -101,7 +99,6 @@ class EventForm extends Component {
 
   render() {
     const { invalid, submitting, pristine } = this.props;
-    console.log(this.state.cityLatLng);
     return (
       <Grid>
         <Script
