@@ -8,6 +8,7 @@ import PlacesAutocomplete, {
 import { Button } from 'semantic-ui-react';
 import { googleApiKey } from '../../app/common/keys';
 import { openModal } from '../modals/modalActions';
+import { incrementAsync, decrementAsync } from './testActions';
 
 class TestComponent extends Component {
   static defaultProps = {
@@ -50,7 +51,7 @@ class TestComponent extends Component {
       onChange: this.onChange
     };
 
-    const { openModal } = this.props;
+    const { incrementAsync, decrementAsync, data, loading } = this.props;
 
     return (
       <div>
@@ -58,27 +59,44 @@ class TestComponent extends Component {
           onLoad={this.handlescriptLoad}
           url={`https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`}
         />
+        <h1>Test Area</h1>
+        <h3>The answer is: {data}</h3>
+        <Button
+          loading={loading}
+          onClick={incrementAsync}
+          color="green"
+          content="Increment"
+        />
+        <Button
+          loading={loading}
+          onClick={decrementAsync}
+          color="red"
+          content="Decrement"
+        />
+        <Button
+          color="teal"
+          content="Open Modal"
+          onClick={this.clickHandler('TestModal', { data: 43 })}
+        />
         {this.state.scriptLoaded && (
           <form onSubmit={this.handleFormSubmit}>
             <PlacesAutocomplete inputProps={inputProps} />
             <button type="submit">Submit</button>
           </form>
         )}
-        <Button
-          color="teal"
-          content="Open Modal"
-          onClick={this.clickHandler('TestModal', { data: 43 })}
-        />
       </div>
     );
   }
 }
 
 const mapStateToProps = state => ({
-  data: state.test.data
+  data: state.test.data,
+  loading: state.test.loading
 });
 
 const actions = {
+  incrementAsync,
+  decrementAsync,
   openModal
 };
 
