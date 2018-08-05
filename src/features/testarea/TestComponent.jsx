@@ -1,17 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import GoogleMapReact from 'google-map-react';
 import Script from 'react-load-script';
 import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng
 } from 'react-places-autocomplete';
-import { Icon } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
 import { googleApiKey } from '../../app/common/keys';
-
-const Marker = () => {
-  return <Icon name="marker" size="big" color="red" />;
-};
+import { openModal } from '../modals/modalActions';
 
 class TestComponent extends Component {
   static defaultProps = {
@@ -44,33 +40,35 @@ class TestComponent extends Component {
     this.setState({ address });
   };
 
+  clickHandler = (modalType, dataInfo) => () => {
+    this.props.openModal(modalType, dataInfo);
+  };
+
   render() {
     const inputProps = {
       value: this.state.address,
       onChange: this.onChange
     };
 
+    const { openModal } = this.props;
+
     return (
       <div>
-        {/* <Script
+        <Script
           onLoad={this.handlescriptLoad}
           url={`https://maps.googleapis.com/maps/api/js?key=${googleApiKey}&libraries=places`}
-        /> */}
+        />
         {this.state.scriptLoaded && (
           <form onSubmit={this.handleFormSubmit}>
             <PlacesAutocomplete inputProps={inputProps} />
             <button type="submit">Submit</button>
           </form>
         )}
-        <div style={{ height: '300px', width: '100%' }}>
-          <GoogleMapReact
-            bootstrapURLKeys={{ key: googleApiKey }}
-            defaultCenter={this.props.center}
-            defaultZoom={this.props.zoom}
-          >
-            <Marker lat={59.955413} lng={30.337844} text={'Kreyser Avrora'} />
-          </GoogleMapReact>
-        </div>
+        <Button
+          color="teal"
+          content="Open Modal"
+          onClick={this.clickHandler('TestModal', { data: 43 })}
+        />
       </div>
     );
   }
@@ -80,4 +78,11 @@ const mapStateToProps = state => ({
   data: state.test.data
 });
 
-export default connect(mapStateToProps)(TestComponent);
+const actions = {
+  openModal
+};
+
+export default connect(
+  mapStateToProps,
+  actions
+)(TestComponent);
