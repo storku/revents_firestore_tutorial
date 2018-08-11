@@ -55,9 +55,9 @@ const RegisterForm = ({
           >
             Register
           </Button>
+          <Divider horizontal>Or</Divider>
+          <SocialLogin />
         </Segment>
-        <Divider horizontal>Or</Divider>
-        <SocialLogin />
       </Form>
     </div>
   );
