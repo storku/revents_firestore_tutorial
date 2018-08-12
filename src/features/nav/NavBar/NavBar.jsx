@@ -50,7 +50,11 @@ class NavBar extends Component {
             </Menu.Item>
           )}
           {authenticated ? (
-            <SignedInMenu profile={profile} signOut={this.handleSignOut} />
+            <SignedInMenu
+              auth={auth}
+              profile={profile}
+              signOut={this.handleSignOut}
+            />
           ) : (
             <SignedOutMenu
               signIn={this.handleSignIn}
