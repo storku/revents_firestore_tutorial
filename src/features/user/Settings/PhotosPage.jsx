@@ -198,7 +198,8 @@ const mapStateToProps = state => ({
 
 const actions = { uploadProfileImage, deletePhoto, setMainPhoto };
 
-const query = ({ auth }) => {
+const query = props => {
+  const { auth } = props;
   return [
     {
       collection: 'users',
@@ -214,7 +215,7 @@ const enhanced = compose(
     mapStateToProps,
     actions
   ),
-  firestoreConnect(auth => query(auth))
+  firestoreConnect(props => query(props))
 );
 
 export default enhanced(PhotosPage);
