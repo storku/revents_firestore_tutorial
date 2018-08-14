@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { firestoreConnect } from 'react-redux-firebase';
+import { firestoreConnect, isEmpty } from 'react-redux-firebase';
 import { compose } from 'redux';
 import { Link } from 'react-router-dom';
 import {
@@ -17,6 +17,9 @@ import {
 } from 'semantic-ui-react';
 import differenceInYears from 'date-fns/difference_in_years';
 import moment from 'moment';
+import LazyLoad from 'react-lazyload';
+import { userDetailedQuery } from '../userQueries';
+import LoadingComponent from '../../../app/layout/LoadingComponent';
 
 class UserDetailedPage extends Component {
   dateOfBirth = () => {
@@ -31,7 +34,9 @@ class UserDetailedPage extends Component {
   };
 
   render() {
-    const { profile, photos } = this.props;
+    const { profile, photos, auth, match, requesting } = this.props;
+    const isCurrentUser = auth.uid === match.params.id;
+    const loading = Object.values(requesting).some(a => a === true);
     const {
       displayName,
       occupation,
@@ -42,6 +47,10 @@ class UserDetailedPage extends Component {
       about,
       createdAt
     } = profile;
+
+    if (loading) {
+      return <LoadingComponent inverted={true} />;
+    }
 
     return (
       <Grid>
@@ -113,14 +122,18 @@ class UserDetailedPage extends Component {
         </Grid.Column>
         <Grid.Column width={4}>
           <Segment>
-            <Button
-              as={Link}
-              to="/settings/basic"
-              color="teal"
-              fluid
-              basic
-              content="Edit Profile"
-            />
+            {isCurrentUser ? (
+              <Button
+                as={Link}
+                to="/settings/basic"
+                color="teal"
+                fluid
+                basic
+                content="Edit Profile"
+              />
+            ) : (
+              <Button color="teal" fluid basic content="Follow User" />
+            )}
           </Segment>
         </Grid.Column>
 
@@ -132,7 +145,15 @@ class UserDetailedPage extends Component {
 
                 <Image.Group size="small">
                   {photos.map(photo => {
-                    return <Image key={photo.id} src={photo.url} />;
+                    return (
+                      <LazyLoad
+                        key={photo.id}
+                        height={150}
+                        placeholder={<Image src="/assets/user.png" />}
+                      >
+                        <Image src={photo.url} />
+                      </LazyLoad>
+                    );
                   })}
                 </Image.Group>
               </Segment>
@@ -177,32 +198,36 @@ class UserDetailedPage extends Component {
   }
 }
 
-const mapStateToProps = state => {
+const mapStateToProps = (state, ownProps) => {
+  let userUid = null;
+  let profile = {};
+
+  if (ownProps.match.params.id === state.auth.uid) {
+    profile = state.firebase.profile;
+  } else {
+    profile =
+      !isEmpty(state.firestore.ordered.profile) &&
+      state.firestore.ordered.profile[0];
+    userUid = ownProps.match.params.id;
+  }
+
   return {
+    profile,
+    userUid,
     auth: state.firebase.auth,
-    profile: state.firebase.profile,
-    photos: state.firestore.ordered.photos
+    photos: state.firestore.ordered.photos,
+    requesting: state.firestore.status.requesting
   };
 };
 
 const actions = {};
-
-const query = props => {
-  const { auth } = props;
-  return [
-    {
-      collection: 'users',
-      doc: auth.uid,
-      subcollections: [{ collection: 'photos' }],
-      storeAs: 'photos'
-    }
-  ];
-};
 
 export default compose(
   connect(
     mapStateToProps,
     actions
   ),
-  firestoreConnect(props => query(props))
+  firestoreConnect(props => {
+    return userDetailedQuery(props);
+  })
 )(UserDetailedPage);
