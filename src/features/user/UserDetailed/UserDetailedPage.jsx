@@ -20,8 +20,19 @@ import moment from 'moment';
 import LazyLoad from 'react-lazyload';
 import { userDetailedQuery } from '../userQueries';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
+import { getUserEvents } from '../userActions';
+import UserDetailedEvents from './UserDetailedEvents';
 
 class UserDetailedPage extends Component {
+  async componentDidMount() {
+    let events = await this.props.getUserEvents(this.props.userUid);
+    console.log(events);
+  }
+
+  changeTab = (e, data) => {
+    this.props.getUserEvents(this.props.userUid, data.activeIndex);
+  };
+
   dateOfBirth = () => {
     if (this.props.profile.dateOfBirth) {
       return differenceInYears(
@@ -34,7 +45,15 @@ class UserDetailedPage extends Component {
   };
 
   render() {
-    const { profile, photos, auth, match, requesting } = this.props;
+    const {
+      profile,
+      photos,
+      auth,
+      match,
+      requesting,
+      events,
+      eventsLoading
+    } = this.props;
     const isCurrentUser = auth.uid === match.params.id;
     const loading = Object.values(requesting).some(a => a === true);
     const {
@@ -159,40 +178,11 @@ class UserDetailedPage extends Component {
               </Segment>
             </Grid.Column>
           ))}
-
-        <Grid.Column width={12}>
-          <Segment attached>
-            <Header icon="calendar" content="Events" />
-            <Menu secondary pointing>
-              <Menu.Item name="All Events" active />
-              <Menu.Item name="Past Events" />
-              <Menu.Item name="Future Events" />
-              <Menu.Item name="Events Hosted" />
-            </Menu>
-
-            <Card.Group itemsPerRow={5}>
-              <Card>
-                <Image src={'/assets/categoryImages/drinks.jpg'} />
-                <Card.Content>
-                  <Card.Header textAlign="center">Event Title</Card.Header>
-                  <Card.Meta textAlign="center">
-                    28th March 2018 at 10:00 PM
-                  </Card.Meta>
-                </Card.Content>
-              </Card>
-
-              <Card>
-                <Image src={'/assets/categoryImages/drinks.jpg'} />
-                <Card.Content>
-                  <Card.Header textAlign="center">Event Title</Card.Header>
-                  <Card.Meta textAlign="center">
-                    28th March 2018 at 10:00 PM
-                  </Card.Meta>
-                </Card.Content>
-              </Card>
-            </Card.Group>
-          </Segment>
-        </Grid.Column>
+        <UserDetailedEvents
+          changeTab={this.changeTab}
+          events={events}
+          eventsLoading={eventsLoading}
+        />
       </Grid>
     );
   }
@@ -214,13 +204,15 @@ const mapStateToProps = (state, ownProps) => {
   return {
     profile,
     userUid,
+    events: state.events,
+    eventsLoading: state.async.loading,
     auth: state.firebase.auth,
     photos: state.firestore.ordered.photos,
     requesting: state.firestore.status.requesting
   };
 };
 
-const actions = {};
+const actions = { getUserEvents };
 
 export default compose(
   connect(
