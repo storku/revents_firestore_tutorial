@@ -14,6 +14,7 @@ export const userDetailedQuery = ({ auth, userUid }) => {
       }
     ];
   } else {
+    console.log('this part is not used! because userUid is always needed!');
     return [
       {
         collection: 'users',

@@ -5,14 +5,12 @@ import { compose } from 'redux';
 import { Link } from 'react-router-dom';
 import {
   Button,
-  Card,
   Grid,
   Header,
   Icon,
   Image,
   Item,
   List,
-  Menu,
   Segment
 } from 'semantic-ui-react';
 import differenceInYears from 'date-fns/difference_in_years';
@@ -26,7 +24,6 @@ import UserDetailedEvents from './UserDetailedEvents';
 class UserDetailedPage extends Component {
   async componentDidMount() {
     let events = await this.props.getUserEvents(this.props.userUid);
-    console.log(events);
   }
 
   changeTab = (e, data) => {
@@ -192,14 +189,21 @@ const mapStateToProps = (state, ownProps) => {
   let userUid = null;
   let profile = {};
 
-  if (ownProps.match.params.id === state.auth.uid) {
-    profile = state.firebase.profile;
-  } else {
-    profile =
-      !isEmpty(state.firestore.ordered.profile) &&
-      state.firestore.ordered.profile[0];
-    userUid = ownProps.match.params.id;
-  }
+  //teacher is wrong about below
+  // if (ownProps.match.params.id === state.auth.uid) {
+  //   profile = state.firebase.profile;
+  // } else {
+  //   profile =
+  //     !isEmpty(state.firestore.ordered.profile) &&
+  //     state.firestore.ordered.profile[0];
+  //   userUid = ownProps.match.params.id;
+  // }
+
+  //my own creation, removing some stuff
+  profile =
+    !isEmpty(state.firestore.ordered.profile) &&
+    state.firestore.ordered.profile[0];
+  userUid = ownProps.match.params.id;
 
   return {
     profile,
