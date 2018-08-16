@@ -73,3 +73,64 @@ exports.cancelActivity = functions.firestore
         return console.log('Error adding activity', error);
       });
   });
+
+exports.addFollower = functions.firestore
+  .document(`users/{userId}/following/{followedUserId}`)
+  .onCreate((event, context) => {
+    console.log('v10');
+    const newEvent = event.data();
+    console.log({ newEvent });
+
+    const followerId = context.params.userId;
+    const followedUserId = context.params.followedUserId;
+    console.log({ context });
+    console.log({ followerId });
+    console.log({ followedUserId });
+
+    return admin
+      .firestore()
+      .collection('users')
+      .doc(followerId)
+      .get()
+      .then(doc => {
+        const followerInfo = doc.data();
+
+        console.log({ followerInfo });
+
+        return admin
+          .firestore()
+          .collection('users')
+          .doc(followedUserId)
+          .collection('followers')
+          .doc(followerId)
+          .set({
+            displayName: followerInfo.displayName,
+            city: followerInfo.city || 'unknown city',
+            photoURL: followerInfo.photoURL
+          });
+      })
+      .catch(error => console.log({ error }));
+  });
+
+exports.deleteFollower = functions.firestore
+  .document(`users/{userId}/following/{followedUserId}`)
+  .onDelete((event, context) => {
+    console.log('v1');
+    const newEvent = event.data();
+    console.log({ newEvent });
+
+    const followerId = context.params.userId;
+    const followedUserId = context.params.followedUserId;
+    console.log({ context });
+    console.log({ followerId });
+    console.log({ followedUserId });
+
+    return admin
+      .firestore()
+      .collection('users')
+      .doc(followedUserId)
+      .collection('followers')
+      .doc(followerId)
+      .delete()
+      .catch(error => console.log({ error }));
+  });

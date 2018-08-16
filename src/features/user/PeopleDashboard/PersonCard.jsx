@@ -3,14 +3,15 @@ import { Card, Image } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 
 const PersonCard = ({ user }) => {
+  const { id, displayName, city, photoURL } = user;
   return (
-    <Card as={Link} to="/profile/12">
-      <Image src="/assets/user.png" />
+    <Card as={Link} to={`/profile/${id}`}>
+      <Image src={photoURL} />
       <Card.Content textAlign="center">
-        <Card.Header content="Display Name" />
+        <Card.Header content={displayName} />
       </Card.Content>
       <Card.Meta textAlign="center">
-        <span>City</span>
+        <span>{city}</span>
       </Card.Meta>
     </Card>
   );

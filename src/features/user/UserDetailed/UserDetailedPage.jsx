@@ -16,13 +16,13 @@ import moment from 'moment';
 import LazyLoad from 'react-lazyload';
 import { userDetailedQuery } from '../userQueries';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
-import { getUserEvents } from '../userActions';
+import { getUserEvents, followUser, unfollowUser } from '../userActions';
 import UserDetailedEvents from './UserDetailedEvents';
 import UserDetailedSidebar from './UserDetailedSidebar';
 
 class UserDetailedPage extends Component {
-  async componentDidMount() {
-    await this.props.getUserEvents(this.props.userUid);
+  componentDidMount() {
+    this.props.getUserEvents(this.props.userUid);
   }
 
   changeTab = (e, data) => {
@@ -40,7 +40,18 @@ class UserDetailedPage extends Component {
     }
   };
 
+  handleFollowButton = () => {
+    const { id, displayName, photoURL, city } = this.props.profile;
+    this.props.followUser(id, displayName, photoURL, city);
+  };
+
+  handleUnfollowButton = () => {
+    const { id } = this.props.match.params;
+    this.props.unfollowUser(id);
+  };
+
   render() {
+    console.log('render');
     const {
       profile,
       photos,
@@ -48,10 +59,13 @@ class UserDetailedPage extends Component {
       match,
       requesting,
       events,
-      eventsLoading
+      eventsLoading,
+      following
     } = this.props;
     const isCurrentUser = auth.uid === match.params.id;
     const loading = Object.values(requesting).some(a => a === true);
+    const isFollowing = !isEmpty(following);
+
     const {
       displayName,
       occupation,
@@ -135,7 +149,12 @@ class UserDetailedPage extends Component {
             </Grid>
           </Segment>
         </Grid.Column>
-        <UserDetailedSidebar isCurrentUser={isCurrentUser} />
+        <UserDetailedSidebar
+          isCurrentUser={isCurrentUser}
+          handleFollowButton={this.handleFollowButton}
+          handleUnfollowButton={this.handleUnfollowButton}
+          renderFollowUserButton={isFollowing}
+        />
 
         {photos &&
           (photos.length > 0 && (
@@ -196,11 +215,12 @@ const mapStateToProps = (state, ownProps) => {
     eventsLoading: state.async.loading,
     auth: state.firebase.auth,
     photos: state.firestore.ordered.photos,
-    requesting: state.firestore.status.requesting
+    requesting: state.firestore.status.requesting,
+    following: state.firestore.ordered.following
   };
 };
 
-const actions = { getUserEvents };
+const actions = { getUserEvents, followUser, unfollowUser };
 
 export default compose(
   connect(
