@@ -22,3 +22,6 @@ yarn-error.log*
 
 #api keys
 keys.js
+
+#firebase cloud functions
+functions/node_modules/**

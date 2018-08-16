@@ -1,11 +1,10 @@
 import { toastr } from 'react-redux-toastr';
-import { DELETE_EVENT, FETCH_EVENTS } from './eventConstants';
+import { FETCH_EVENTS } from './eventConstants';
 import {
   asyncActionStart,
   asyncActionFinish,
   asyncActionError
 } from '../async/asyncActions';
-import { fetchSampleData } from '../../app/data/mockApi';
 import { createNewEvent } from '../../app/common/util/helpers';
 import moment from 'moment';
 import firebase from '../../app/config/firebase';
@@ -31,7 +30,7 @@ export const createEvent = event => async (
     await firestore.set(`event_attendee/${createdEvent.id}_${user.uid}`, {
       eventId: createdEvent.id,
       userUid: user.uid,
-      eventDate: event.date,
+      eventDate: firestore.Timestamp.fromDate(event.date),
       host: true
     });
     toastr.success('Success', 'Event has been created!');

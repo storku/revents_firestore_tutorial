@@ -23,7 +23,7 @@ import UserDetailedEvents from './UserDetailedEvents';
 
 class UserDetailedPage extends Component {
   async componentDidMount() {
-    let events = await this.props.getUserEvents(this.props.userUid);
+    await this.props.getUserEvents(this.props.userUid);
   }
 
   changeTab = (e, data) => {
