@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { firestoreConnect, isEmpty } from 'react-redux-firebase';
 import { compose } from 'redux';
-import { Link } from 'react-router-dom';
 import {
-  Button,
   Grid,
   Header,
   Icon,
@@ -20,6 +18,7 @@ import { userDetailedQuery } from '../userQueries';
 import LoadingComponent from '../../../app/layout/LoadingComponent';
 import { getUserEvents } from '../userActions';
 import UserDetailedEvents from './UserDetailedEvents';
+import UserDetailedSidebar from './UserDetailedSidebar';
 
 class UserDetailedPage extends Component {
   async componentDidMount() {
@@ -136,22 +135,7 @@ class UserDetailedPage extends Component {
             </Grid>
           </Segment>
         </Grid.Column>
-        <Grid.Column width={4}>
-          <Segment>
-            {isCurrentUser ? (
-              <Button
-                as={Link}
-                to="/settings/basic"
-                color="teal"
-                fluid
-                basic
-                content="Edit Profile"
-              />
-            ) : (
-              <Button color="teal" fluid basic content="Follow User" />
-            )}
-          </Segment>
-        </Grid.Column>
+        <UserDetailedSidebar isCurrentUser={isCurrentUser} />
 
         {photos &&
           (photos.length > 0 && (
