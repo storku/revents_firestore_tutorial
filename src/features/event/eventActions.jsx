@@ -7,6 +7,7 @@ import {
 } from '../async/asyncActions';
 import { createNewEvent } from '../../app/common/util/helpers';
 import moment from 'moment';
+import compareAsc from 'date-fns/compare_asc';
 import firebase from '../../app/config/firebase';
 
 export const fetchEvents = events => {
@@ -39,19 +40,48 @@ export const createEvent = event => async (
   }
 };
 
-export const updateEvent = event => async (
-  dispatch,
-  getState,
-  { getFirestore }
-) => {
-  const firestore = getFirestore();
+export const updateEvent = event => async (dispatch, getState) => {
+  dispatch(asyncActionStart());
+  const firestore = firebase.firestore();
   if (event.date !== getState().firestore.ordered.events[0].date) {
     event.date = moment(event.date).toDate();
   }
   try {
-    await firestore.update(`events/${event.id}`, event);
+    const eventDocRef = firestore.collection('events').doc(event.id);
+    const dateEqual = compareAsc(
+      getState().firestore.ordered.events[0].date.toDate(),
+      event.date
+    );
+    if (dateEqual !== 0) {
+      const batch = firestore.batch();
+      await batch.update(eventDocRef, event);
+
+      const eventAttendeeRef = firestore.collection('event_attendee');
+      const eventAttendeeQuery = eventAttendeeRef.where(
+        'eventId',
+        '==',
+        event.id
+      );
+      const eventAttendeeQuerySnap = await eventAttendeeQuery.get();
+
+      for (let i = 0; i < eventAttendeeQuerySnap.docs.length; i++) {
+        const eventAttendeeDocRef = firestore
+          .collection('event_attendee')
+          .doc(eventAttendeeQuerySnap.docs[i].id);
+        console.log({ eventAttendeeDocRef });
+        await batch.update(eventAttendeeDocRef, {
+          eventDate: event.date
+        });
+      }
+
+      await batch.commit();
+    } else {
+      await eventDocRef.update(event);
+    }
+    dispatch(asyncActionFinish());
     toastr.success('Success', 'Event has been updated!');
   } catch (error) {
+    dispatch(asyncActionFinish());
     toastr.error('Oops', 'Something went wrong');
   }
 };
