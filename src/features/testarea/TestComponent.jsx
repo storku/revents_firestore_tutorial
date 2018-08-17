@@ -8,7 +8,7 @@ import PlacesAutocomplete, {
 import { Button } from 'semantic-ui-react';
 import { googleApiKey } from '../../app/common/keys';
 import { openModal } from '../modals/modalActions';
-import { incrementAsync, decrementAsync } from './testActions';
+import { incrementAsync, decrementAsync, testPermission } from './testActions';
 
 class TestComponent extends Component {
   static defaultProps = {
@@ -51,7 +51,13 @@ class TestComponent extends Component {
       onChange: this.onChange
     };
 
-    const { incrementAsync, decrementAsync, data, loading } = this.props;
+    const {
+      incrementAsync,
+      decrementAsync,
+      data,
+      loading,
+      testPermission
+    } = this.props;
 
     return (
       <div>
@@ -78,6 +84,11 @@ class TestComponent extends Component {
           content="Open Modal"
           onClick={this.clickHandler('TestModal', { data: 43 })}
         />
+        <Button
+          color="teal"
+          content="Test Permission"
+          onClick={testPermission}
+        />
         {this.state.scriptLoaded && (
           <form onSubmit={this.handleFormSubmit}>
             <PlacesAutocomplete inputProps={inputProps} />
@@ -97,7 +108,8 @@ const mapStateToProps = state => ({
 const actions = {
   incrementAsync,
   decrementAsync,
-  openModal
+  openModal,
+  testPermission
 };
 
 export default connect(
